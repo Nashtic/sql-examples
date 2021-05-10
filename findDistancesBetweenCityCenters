@@ -1,0 +1,42 @@
+-- Created different cities with their city center locations and borders information // Geography data types used at this SQL query --
+-- 'POINT' used for city centers exact location // 'LINESTRING' used for cities borders -- 
+
+USE [SPATIALDATABASE]
+GO
+
+-- Create new cities with their attiributes -- 
+
+INSERT INTO [dbo].[Sehirler]
+           ([SehirId]
+           ,[SehirAdi]
+           ,[PlakaNo]
+           ,[TelefonKodu]
+           ,[RowNumber]
+           ,[location_center]
+           ,[location_border])
+     VALUES
+           (1500
+           ,'London'
+           ,99
+           ,20
+           ,350
+           ,GEOGRAPHY::STGeomFromText('POINT(51.485659 -0.100678)', 4326)
+           ,GEOGRAPHY::STGeomFromText('LINESTRING(51.267500 -0.099690, 51.526688 -0.683438, 51.734683 -0.100718,  51.465130 0.372003)', 4326)
+		       )
+GO
+
+-- Find cities that it's city center location is not Null -- 
+
+SELECT s.SehirAdi, s.location_center.STAsText(), location_border.STAsText()
+FROM   Sehirler s
+WHERE  s.location_center is not null
+
+-- Calculate the city centers distances between them and order them by ASC(shortest to farthest --
+
+SELECT s1.SehirAdi,s2.SehirAdi,s1.location_center.STDistance(s2.location_center) as mesafe 
+FROM   Sehirler s1,Sehirler s2
+WHERE  s1.location_center  is not null AND 
+	     s2.location_center is not null  AND
+	     s1.SehirId!=s2.SehirId AND 
+	     s1.SehirAdi='London'
+ORDER BY mesafe
